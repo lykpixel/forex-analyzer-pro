@@ -478,11 +478,18 @@ st.caption(
 )
 
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
+
+    # Yahoo Finance จำกัดข้อมูลย้อนหลังสำหรับ Intraday
+    if interval in ("15m", "30m", "1h"):
+        download_period = "60d"
+    else:
+        download_period = period
+
     if interval == "4h":
-        hourly = download_data(symbol, period, "1h")
+        hourly = download_data(symbol, download_period, "1h")
         raw = resample_4h(hourly)
     else:
-        raw = download_data(symbol, period, interval)
+        raw = download_data(symbol, download_period, interval)
 
 ok, status_text = validate_asset_data(raw, asset_name, symbol)
 if not ok:
