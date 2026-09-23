@@ -477,6 +477,128 @@ st.caption(
     "เปลี่ยนสินทรัพย์/Timeframe แล้วระบบจะโหลดชุดข้อมูลของสินทรัพย์นั้นโดยตรง"
 )
 
+# ============================================================
+# M30 V3 - SIGNAL ENGINE
+# Step 1: Trend + Market Structure
+# ============================================================
+
+import pandas as pd
+import numpy as np
+
+
+def calculate_m30_signal(df):
+    """
+    วิเคราะห์ Trend และ Market Structure สำหรับ M30
+    คืนค่าเป็น dictionary เพื่อใช้ต่อกับระบบ Signal
+    """
+
+    if df is None or df.empty:
+        return {
+            "signal": "NO DATA",
+            "trend": "UNKNOWN",
+            "structure": "UNKNOWN",
+            "score": 0
+        }
+
+    data = df.copy()
+
+    # ตรวจสอบชื่อคอลัมน์
+    data.columns = [str(c).lower() for c in data.columns]
+
+    required = ["open", "high", "low", "close"]
+
+    if not all(col in data.columns for col in required):
+        return {
+            "signal": "ERROR",
+            "trend": "UNKNOWN",
+            "structure": "UNKNOWN",
+            "score": 0
+        }
+
+    # --------------------------------------------------------
+    # Trend
+    # --------------------------------------------------------
+
+    data["ema20"] = data["close"].ewm(span=20, adjust=False).mean()
+    data["ema50"] = data["close"].ewm(span=50, adjust=False).mean()
+
+    last = data.iloc[-1]
+
+    if last["close"] > last["ema20"] and last["ema20"] > last["ema50"]:
+        trend = "BULLISH"
+
+    elif last["close"] < last["ema20"] and last["ema20"] < last["ema50"]:
+        trend = "BEARISH"
+
+    else:
+        trend = "SIDEWAYS"
+
+    # --------------------------------------------------------
+    # Market Structure
+    # --------------------------------------------------------
+
+    lookback = min(10, len(data))
+
+    recent = data.tail(lookback)
+
+    recent_high = recent["high"].max()
+    recent_low = recent["low"].min()
+
+    previous = data.iloc[-2] if len(data) >= 2 else last
+
+    if last["close"] > recent_high:
+        structure = "BREAKOUT_UP"
+
+    elif last["close"] < recent_low:
+        structure = "BREAKOUT_DOWN"
+
+    elif last["close"] > previous["high"]:
+        structure = "HIGHER_HIGH"
+
+    elif last["close"] < previous["low"]:
+        structure = "LOWER_LOW"
+
+    else:
+        structure = "RANGE"
+
+    # --------------------------------------------------------
+    # Score
+    # --------------------------------------------------------
+
+    score = 0
+
+    if trend == "BULLISH":
+        score += 40
+
+    elif trend == "BEARISH":
+        score -= 40
+
+    if structure in ["BREAKOUT_UP", "HIGHER_HIGH"]:
+        score += 30
+
+    elif structure in ["BREAKOUT_DOWN", "LOWER_LOW"]:
+        score -= 30
+
+    # --------------------------------------------------------
+    # Final Signal
+    # --------------------------------------------------------
+
+    if score >= 50:
+        signal = "LONG"
+
+    elif score <= -50:
+        signal = "SHORT"
+
+    else:
+        signal = "WAIT"
+
+    return {
+        "signal": signal,
+        "trend": trend,
+        "structure": structure,
+        "score": score
+    }
+    
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
 
     # Yahoo Finance จำกัดข้อมูลย้อนหลังสำหรับ Intraday
@@ -497,6 +619,29 @@ if not ok:
     st.info("ลองกด 🔄 Refresh data เพื่อดึงข้อมูลชุดใหม่")
     st.stop()
 
+# ============================================================
+# M30 V3 - SIGNAL ANALYSIS
+# ============================================================
+
+if interval == "30m":
+    m30_result = calculate_m30_signal(raw)
+
+    st.subheader("📊 M30 V3 Signal")
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Signal", m30_result["signal"])
+
+    with col2:
+        st.metric("Trend", m30_result["trend"])
+
+    with col3:
+        st.metric("Structure", m30_result["structure"])
+
+    with col4:
+        st.metric("Score", m30_result["score"])
+        
 st.success(f"✅ Data integrity OK • {status_text}")
 
 data = add_indicators(raw, ema_fast, ema_slow, ema_trend, rsi_period, atr_period)
@@ -797,125 +942,3 @@ st.warning(
     "ตรวจสอบ spread, slippage, commission, contract size และ pip value "
     "กับโบรกเกอร์ก่อนนำผลไปใช้งานจริง."
 )
-
-# ============================================================
-# M30 V3 - SIGNAL ENGINE
-# Step 1: Trend + Market Structure
-# ============================================================
-
-import pandas as pd
-import numpy as np
-
-
-def calculate_m30_signal(df):
-    """
-    วิเคราะห์ Trend และ Market Structure สำหรับ M30
-    คืนค่าเป็น dictionary เพื่อใช้ต่อกับระบบ Signal
-    """
-
-    if df is None or df.empty:
-        return {
-            "signal": "NO DATA",
-            "trend": "UNKNOWN",
-            "structure": "UNKNOWN",
-            "score": 0
-        }
-
-    data = df.copy()
-
-    # ตรวจสอบชื่อคอลัมน์
-    data.columns = [str(c).lower() for c in data.columns]
-
-    required = ["open", "high", "low", "close"]
-
-    if not all(col in data.columns for col in required):
-        return {
-            "signal": "ERROR",
-            "trend": "UNKNOWN",
-            "structure": "UNKNOWN",
-            "score": 0
-        }
-
-    # --------------------------------------------------------
-    # Trend
-    # --------------------------------------------------------
-
-    data["ema20"] = data["close"].ewm(span=20, adjust=False).mean()
-    data["ema50"] = data["close"].ewm(span=50, adjust=False).mean()
-
-    last = data.iloc[-1]
-
-    if last["close"] > last["ema20"] and last["ema20"] > last["ema50"]:
-        trend = "BULLISH"
-
-    elif last["close"] < last["ema20"] and last["ema20"] < last["ema50"]:
-        trend = "BEARISH"
-
-    else:
-        trend = "SIDEWAYS"
-
-    # --------------------------------------------------------
-    # Market Structure
-    # --------------------------------------------------------
-
-    lookback = min(10, len(data))
-
-    recent = data.tail(lookback)
-
-    recent_high = recent["high"].max()
-    recent_low = recent["low"].min()
-
-    previous = data.iloc[-2] if len(data) >= 2 else last
-
-    if last["close"] > recent_high:
-        structure = "BREAKOUT_UP"
-
-    elif last["close"] < recent_low:
-        structure = "BREAKOUT_DOWN"
-
-    elif last["close"] > previous["high"]:
-        structure = "HIGHER_HIGH"
-
-    elif last["close"] < previous["low"]:
-        structure = "LOWER_LOW"
-
-    else:
-        structure = "RANGE"
-
-    # --------------------------------------------------------
-    # Score
-    # --------------------------------------------------------
-
-    score = 0
-
-    if trend == "BULLISH":
-        score += 40
-
-    elif trend == "BEARISH":
-        score -= 40
-
-    if structure in ["BREAKOUT_UP", "HIGHER_HIGH"]:
-        score += 30
-
-    elif structure in ["BREAKOUT_DOWN", "LOWER_LOW"]:
-        score -= 30
-
-    # --------------------------------------------------------
-    # Final Signal
-    # --------------------------------------------------------
-
-    if score >= 50:
-        signal = "LONG"
-
-    elif score <= -50:
-        signal = "SHORT"
-
-    else:
-        signal = "WAIT"
-
-    return {
-        "signal": signal,
-        "trend": trend,
-        "structure": structure,
-        "score": score
-    }
