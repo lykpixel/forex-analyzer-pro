@@ -50,13 +50,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-st.set_page_config(
-    page_title="Forex Analyzer Pro v3",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
 # ============================================================
 # MOBILE RESPONSIVE UI
 # ============================================================
