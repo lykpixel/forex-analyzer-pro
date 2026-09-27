@@ -879,13 +879,7 @@ with left:
     with b:
         st.metric("Bullish votes", f"{bullish_votes}/5")
 
-    c, d = st.columns(2)
-
-    with c:
         st.metric("Volatility", f"{latest['ATR_Pct']:.5f}% ATR")
-
-    with d:
-        st.metric("RSI", f"{latest['RSI']:.1f}")
 
     st.write("**เหตุผลของสัญญาณ**")
 
