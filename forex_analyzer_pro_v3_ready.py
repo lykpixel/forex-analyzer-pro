@@ -866,7 +866,7 @@ with left:
     a, b, c = st.columns(3)
     a.metric("Trend", trend)
     b.metric("Bullish votes", f"{bullish_votes}/5")
-    c.metric("Volatility", f"{latest['ATR_Pct']:.2f}% ATR")
+    c.metric("Volatility", f"{latest['ATR_Pct']:.5f}% ATR")
 
     st.write("**เหตุผลของสัญญาณ**")
     for reason in reasons:
