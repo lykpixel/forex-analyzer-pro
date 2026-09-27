@@ -97,9 +97,8 @@ h3 {
 
 header[data-testid="stHeader"] {
     height: 1.2rem !important;
-    2rem: transparent !important;
+    background: transparent !important;
 }
-
     .block-container {
         padding-left: 0.65rem;
         padding-right: 0.65rem;
