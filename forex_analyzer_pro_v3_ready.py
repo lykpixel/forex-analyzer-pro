@@ -92,11 +92,6 @@ h3 {
     gap: 0.5rem;
 }
 
-/* Streamlit Header */
-header[data-testid="stHeader"] {
-    height: 2.5rem !important;
-}
-
 /* Mobile */
 @media (max-width: 768px) {
 
