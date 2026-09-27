@@ -96,8 +96,8 @@ h3 {
 @media (max-width: 768px) {
 
 header[data-testid="stHeader"] {
-    height: 2rem !important;
-    background: transparent !important;
+    height: 1.2rem !important;
+    2rem: transparent !important;
 }
 
     .block-container {
