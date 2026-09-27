@@ -50,6 +50,112 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+st.set_page_config(
+    page_title="Forex Analyzer Pro v3",
+    page_icon="📈",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
+
+# ============================================================
+# MOBILE RESPONSIVE UI
+# ============================================================
+
+st.markdown("""
+<style>
+
+/* ลดพื้นที่ขอบของหน้าหลัก */
+.block-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* ลดขนาดหัวข้อ */
+h1 {
+    font-size: 1.7rem !important;
+}
+
+h2 {
+    font-size: 1.35rem !important;
+}
+
+h3 {
+    font-size: 1.15rem !important;
+}
+
+/* ลดขนาด Metric */
+[data-testid="stMetricValue"] {
+    font-size: 1.35rem !important;
+}
+
+[data-testid="stMetricLabel"] {
+    font-size: 0.85rem !important;
+}
+
+/* ลดช่องว่างทั่วไป */
+[data-testid="stVerticalBlock"] {
+    gap: 0.5rem;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    .block-container {
+        padding-left: 0.65rem;
+        padding-right: 0.65rem;
+        padding-top: 0.5rem;
+    }
+
+    h1 {
+        font-size: 1.35rem !important;
+    }
+
+    h2 {
+        font-size: 1.15rem !important;
+    }
+
+    h3 {
+        font-size: 1rem !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.1rem !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        font-size: 0.72rem !important;
+    }
+
+    /* ลดความสูงของ input / selectbox */
+    div[data-baseweb="select"] {
+        min-height: 38px !important;
+    }
+
+    input {
+        font-size: 0.9rem !important;
+    }
+
+    /* ลดระยะห่างระหว่างส่วนต่าง ๆ */
+    [data-testid="stVerticalBlock"] {
+        gap: 0.35rem;
+    }
+
+    /* ลดพื้นที่ของ sidebar */
+    section[data-testid="stSidebar"] {
+        width: 270px !important;
+    }
+
+    /* ทำให้ข้อความทั่วไปกระชับ */
+    p, label {
+        font-size: 0.85rem !important;
+    }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 ASSETS = {
     "EUR/USD": "EURUSD=X",
     "GBP/USD": "GBPUSD=X",
