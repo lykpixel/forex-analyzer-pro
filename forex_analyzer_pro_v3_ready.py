@@ -734,13 +734,15 @@ if interval == "30m":
 
     st.subheader("📊 M30 V3 Signal")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
 
     with col1:
         st.metric("Signal", m30_result["signal"])
 
     with col2:
         st.metric("Trend", m30_result["trend"])
+
+    col3, col4 = st.columns(2)
 
     with col3:
         st.metric("Structure", m30_result["structure"])
