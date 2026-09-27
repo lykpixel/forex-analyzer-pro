@@ -105,7 +105,7 @@ h3 {
     .block-container {
         padding-left: 0.65rem;
         padding-right: 0.65rem;
-        padding-top: 0.5rem;
+        padding-top: 1.2rem;
     }
 
     h1 {
