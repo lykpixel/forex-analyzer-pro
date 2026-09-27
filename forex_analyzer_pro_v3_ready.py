@@ -886,20 +886,28 @@ with left:
     for reason in reasons:
         st.write("• " + reason)
 
-
 with right:
     st.subheader("🌐 Multi-Timeframe")
 
-    for label in ["H1", "D1"]:
-        s, sc = mtf[label]
+    mtf1, mtf2 = st.columns(2)
+
+    with mtf1:
+        s, sc = mtf["H1"]
         st.metric(
-            label,
+            "H1",
+            s,
+            f"{sc:+d}" if s != "N/A" else ""
+        )
+
+    with mtf2:
+        s, sc = mtf["D1"]
+        st.metric(
+            "D1",
             s,
             f"{sc:+d}" if s != "N/A" else ""
         )
 
     st.caption("MTF ใช้เป็นบริบทประกอบ ไม่ใช่การยืนยันผลลัพธ์ในอนาคต")
-
 
 # ============================================================
 # PRICE CHART
