@@ -100,6 +100,11 @@ header[data-testid="stHeader"] {
 /* Mobile */
 @media (max-width: 768px) {
 
+header[data-testid="stHeader"] {
+    height: 2rem !important;
+    background: transparent !important;
+}
+
     .block-container {
         padding-left: 0.65rem;
         padding-right: 0.65rem;
