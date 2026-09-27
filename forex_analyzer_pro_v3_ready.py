@@ -882,9 +882,9 @@ with left:
         st.metric("Volatility", f"{latest['ATR_Pct']:.5f}% ATR")
 
     st.write("**เหตุผลของสัญญาณ**")
-
-    for reason in reasons:
-        st.write("• " + reason)
+    
+    reasons_text = " • ".join(reasons)
+    st.caption(reasons_text)
 
 with right:
     st.subheader("🌐 Multi-Timeframe")
