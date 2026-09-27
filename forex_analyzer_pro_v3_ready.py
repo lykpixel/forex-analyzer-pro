@@ -816,14 +816,29 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Score", f"{score:+d}/5")
-m2.metric("Confidence", f"{confidence}%")
-m3.metric("RSI", f"{latest['RSI']:.1f}")
-m4.metric("ATR", f"{latest['ATR']:,.2f}")
+# ============================================================
+# KEY METRICS
+# ============================================================
+
+st.subheader("📊 Key Metrics")
+
+m1, m2 = st.columns(2)
+
+with m1:
+    st.metric("Score", f"{score:+d}/5")
+
+with m2:
+    st.metric("Confidence", f"{confidence}%")
+
+m3, m4 = st.columns(2)
+
+with m3:
+    st.metric("RSI", f"{latest['RSI']:.1f}")
+
+with m4:
+    st.metric("ATR", f"{latest['ATR']:,.2f}")
 
 st.divider()
-
 
 # ============================================================
 # MARKET OVERVIEW
