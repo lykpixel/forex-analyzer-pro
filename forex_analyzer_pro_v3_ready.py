@@ -863,10 +863,21 @@ with left:
 
     trend = "Bullish" if bullish_votes >= 4 else "Bearish" if bullish_votes <= 1 else "Sideways"
 
-    a, b, c = st.columns(3)
-    a.metric("Trend", trend)
-    b.metric("Bullish votes", f"{bullish_votes}/5")
-    c.metric("Volatility", f"{latest['ATR_Pct']:.5f}% ATR")
+    a, b = st.columns(2)
+
+with a:
+    st.metric("Trend", trend)
+
+with b:
+    st.metric("Bullish votes", f"{bullish_votes}/5")
+
+c, d = st.columns(2)
+
+with c:
+    st.metric("Volatility", f"{latest['ATR_Pct']:.5f}% ATR")
+
+with d:
+    st.metric("RSI", f"{latest['RSI']:.1f}")
 
     st.write("**เหตุผลของสัญญาณ**")
     for reason in reasons:
