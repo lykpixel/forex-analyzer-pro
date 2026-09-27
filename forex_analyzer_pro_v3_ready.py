@@ -845,8 +845,10 @@ st.divider()
 # ============================================================
 
 left, right = st.columns([1.5, 1])
+
 with left:
     st.subheader("🧭 Market Overview")
+
     ef = latest[f"EMA{ema_fast}"]
     es = latest[f"EMA{ema_slow}"]
     et = latest[f"EMA{ema_trend}"]
@@ -861,9 +863,15 @@ with left:
         ]
     )
 
-    trend = "Bullish" if bullish_votes >= 4 else "Bearish" if bullish_votes <= 1 else "Sideways"
+    trend = (
+        "Bullish"
+        if bullish_votes >= 4
+        else "Bearish"
+        if bullish_votes <= 1
+        else "Sideways"
+    )
 
- a, b = st.columns(2)
+    a, b = st.columns(2)
 
     with a:
         st.metric("Trend", trend)
@@ -880,14 +888,22 @@ with left:
         st.metric("RSI", f"{latest['RSI']:.1f}")
 
     st.write("**เหตุผลของสัญญาณ**")
+
     for reason in reasons:
         st.write("• " + reason)
 
+
 with right:
     st.subheader("🌐 Multi-Timeframe")
+
     for label in ["H1", "D1"]:
         s, sc = mtf[label]
-        st.metric(label, s, f"{sc:+d}" if s != "N/A" else "")
+        st.metric(
+            label,
+            s,
+            f"{sc:+d}" if s != "N/A" else ""
+        )
+
     st.caption("MTF ใช้เป็นบริบทประกอบ ไม่ใช่การยืนยันผลลัพธ์ในอนาคต")
 
 
