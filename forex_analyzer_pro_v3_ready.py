@@ -942,8 +942,17 @@ if interval == "30m":
         )
     st.metric(
     "Momentum Strength",
-    m30_result["momentum_strength"]
-)
+    m30_result["momentum_strength"])
+    st.metric(
+        "RSI Zone",
+        (
+            "OVERSOLD"
+            if m30_result["rsi"] <= 30
+            else "OVERBOUGHT"
+            if m30_result["rsi"] >= 70
+            else "NORMAL"
+        )
+
 
 st.success(f"✅ Data integrity OK • {status_text}")
 
