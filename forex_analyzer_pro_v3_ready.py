@@ -591,8 +591,8 @@ import numpy as np
 
 def calculate_m30_signal(df):
     """
-    วิเคราะห์ Trend และ Market Structure สำหรับ M30
-    คืนค่าเป็น dictionary เพื่อใช้ต่อกับระบบ Signal
+    M30 V3 Signal Engine
+    Trend + Market Structure + Momentum + Signal Confirmation
     """
 
     if df is None or df.empty:
@@ -600,6 +600,8 @@ def calculate_m30_signal(df):
             "signal": "NO DATA",
             "trend": "UNKNOWN",
             "structure": "UNKNOWN",
+            "momentum": "UNKNOWN",
+            "confirmation": "NO",
             "score": 0
         }
 
@@ -615,6 +617,8 @@ def calculate_m30_signal(df):
             "signal": "ERROR",
             "trend": "UNKNOWN",
             "structure": "UNKNOWN",
+            "momentum": "UNKNOWN",
+            "confirmation": "NO",
             "score": 0
         }
 
@@ -624,6 +628,21 @@ def calculate_m30_signal(df):
 
     data["ema20"] = data["close"].ewm(span=20, adjust=False).mean()
     data["ema50"] = data["close"].ewm(span=50, adjust=False).mean()
+
+    # RSI
+    delta = data["close"].diff()
+
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+
+    avg_gain = gain.rolling(14).mean()
+    avg_loss = loss.rolling(14).mean()
+
+    rs = avg_gain / avg_loss.replace(0, float("nan"))
+    data["rsi"] = 100 - (100 / (1 + rs))
+
+    # Price momentum
+    data["momentum"] = data["close"].pct_change(5) * 100
 
     last = data.iloc[-1]
 
@@ -641,7 +660,6 @@ def calculate_m30_signal(df):
     # --------------------------------------------------------
 
     lookback = min(10, len(data))
-
     recent = data.tail(lookback)
 
     recent_high = recent["high"].max()
@@ -665,7 +683,26 @@ def calculate_m30_signal(df):
         structure = "RANGE"
 
     # --------------------------------------------------------
-    # Score
+    # Momentum
+    # --------------------------------------------------------
+
+    rsi = last["rsi"]
+    price_momentum = last["momentum"]
+
+    if pd.isna(rsi) or pd.isna(price_momentum):
+        momentum = "NEUTRAL"
+
+    elif rsi >= 55 and price_momentum > 0:
+        momentum = "BULLISH"
+
+    elif rsi <= 45 and price_momentum < 0:
+        momentum = "BEARISH"
+
+    else:
+        momentum = "NEUTRAL"
+
+    # --------------------------------------------------------
+    # Base Score
     # --------------------------------------------------------
 
     score = 0
@@ -683,13 +720,48 @@ def calculate_m30_signal(df):
         score -= 30
 
     # --------------------------------------------------------
+    # Signal Confirmation
+    # --------------------------------------------------------
+
+    bullish_structure = structure in [
+        "BREAKOUT_UP",
+        "HIGHER_HIGH"
+    ]
+
+    bearish_structure = structure in [
+        "BREAKOUT_DOWN",
+        "LOWER_LOW"
+    ]
+
+    bullish_confirmation = (
+        trend == "BULLISH"
+        and bullish_structure
+        and momentum == "BULLISH"
+    )
+
+    bearish_confirmation = (
+        trend == "BEARISH"
+        and bearish_structure
+        and momentum == "BEARISH"
+    )
+
+    if bullish_confirmation:
+        confirmation = "CONFIRMED LONG"
+
+    elif bearish_confirmation:
+        confirmation = "CONFIRMED SHORT"
+
+    else:
+        confirmation = "NOT CONFIRMED"
+
+    # --------------------------------------------------------
     # Final Signal
     # --------------------------------------------------------
 
-    if score >= 50:
+    if bullish_confirmation and score >= 50:
         signal = "LONG"
 
-    elif score <= -50:
+    elif bearish_confirmation and score <= -50:
         signal = "SHORT"
 
     else:
@@ -699,9 +771,11 @@ def calculate_m30_signal(df):
         "signal": signal,
         "trend": trend,
         "structure": structure,
+        "momentum": momentum,
+        "confirmation": confirmation,
         "score": score
     }
-    
+        
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
 
     # Yahoo Finance จำกัดข้อมูลย้อนหลังสำหรับ Intraday
@@ -745,6 +819,14 @@ if interval == "30m":
         st.metric("Structure", m30_result["structure"])
 
     with col4:
+        st.metric("Momentum", m30_result["momentum"])
+
+    col5, col6 = st.columns(2)
+
+    with col5:
+        st.metric("Confirmation", m30_result["confirmation"])
+
+    with col6:
         st.metric("Score", m30_result["score"])
         
 st.success(f"✅ Data integrity OK • {status_text}")
