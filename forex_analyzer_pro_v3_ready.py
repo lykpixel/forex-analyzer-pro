@@ -588,11 +588,11 @@ st.caption(
 import pandas as pd
 import numpy as np
 
-
 def calculate_m30_signal(df):
     """
     M30 V3 Signal Engine
     Trend + Market Structure + Momentum + Signal Confirmation
+    Step 3.5 - Momentum Strength
     """
 
     if df is None or df.empty:
@@ -601,13 +601,14 @@ def calculate_m30_signal(df):
             "trend": "UNKNOWN",
             "structure": "UNKNOWN",
             "momentum": "UNKNOWN",
+            "momentum_strength": "UNKNOWN",
             "confirmation": "NO",
-            "score": 0
+            "score": 0,
+            "rsi": 0.0,
+            "price_momentum": 0.0
         }
 
     data = df.copy()
-
-    # ตรวจสอบชื่อคอลัมน์
     data.columns = [str(c).lower() for c in data.columns]
 
     required = ["open", "high", "low", "close"]
@@ -618,18 +619,31 @@ def calculate_m30_signal(df):
             "trend": "UNKNOWN",
             "structure": "UNKNOWN",
             "momentum": "UNKNOWN",
+            "momentum_strength": "UNKNOWN",
             "confirmation": "NO",
-            "score": 0
+            "score": 0,
+            "rsi": 0.0,
+            "price_momentum": 0.0
         }
 
     # --------------------------------------------------------
     # Trend
     # --------------------------------------------------------
 
-    data["ema20"] = data["close"].ewm(span=20, adjust=False).mean()
-    data["ema50"] = data["close"].ewm(span=50, adjust=False).mean()
+    data["ema20"] = data["close"].ewm(
+        span=20,
+        adjust=False
+    ).mean()
 
+    data["ema50"] = data["close"].ewm(
+        span=50,
+        adjust=False
+    ).mean()
+
+    # --------------------------------------------------------
     # RSI
+    # --------------------------------------------------------
+
     delta = data["close"].diff()
 
     gain = delta.clip(lower=0)
@@ -638,18 +652,37 @@ def calculate_m30_signal(df):
     avg_gain = gain.rolling(14).mean()
     avg_loss = loss.rolling(14).mean()
 
-    rs = avg_gain / avg_loss.replace(0, float("nan"))
+    rs = avg_gain / avg_loss.replace(
+        0,
+        float("nan")
+    )
+
     data["rsi"] = 100 - (100 / (1 + rs))
 
-    # Price momentum
-    data["momentum"] = data["close"].pct_change(5) * 100
+    # --------------------------------------------------------
+    # Price Momentum
+    # --------------------------------------------------------
+
+    data["momentum"] = (
+        data["close"].pct_change(5) * 100
+    )
 
     last = data.iloc[-1]
 
-    if last["close"] > last["ema20"] and last["ema20"] > last["ema50"]:
+    # --------------------------------------------------------
+    # Trend Detection
+    # --------------------------------------------------------
+
+    if (
+        last["close"] > last["ema20"]
+        and last["ema20"] > last["ema50"]
+    ):
         trend = "BULLISH"
 
-    elif last["close"] < last["ema20"] and last["ema20"] < last["ema50"]:
+    elif (
+        last["close"] < last["ema20"]
+        and last["ema20"] < last["ema50"]
+    ):
         trend = "BEARISH"
 
     else:
@@ -660,12 +693,17 @@ def calculate_m30_signal(df):
     # --------------------------------------------------------
 
     lookback = min(10, len(data))
+
     recent = data.tail(lookback)
 
     recent_high = recent["high"].max()
     recent_low = recent["low"].min()
 
-    previous = data.iloc[-2] if len(data) >= 2 else last
+    previous = (
+        data.iloc[-2]
+        if len(data) >= 2
+        else last
+    )
 
     if last["close"] > recent_high:
         structure = "BREAKOUT_UP"
@@ -689,34 +727,47 @@ def calculate_m30_signal(df):
     rsi = last["rsi"]
     price_momentum = last["momentum"]
 
-    if pd.isna(rsi) or pd.isna(price_momentum):
+    if (
+        pd.isna(rsi)
+        or pd.isna(price_momentum)
+    ):
         momentum = "NEUTRAL"
 
-    elif rsi >= 55 and price_momentum > 0:
+    elif (
+        rsi >= 55
+        and price_momentum > 0
+    ):
         momentum = "BULLISH"
 
-    elif rsi <= 45 and price_momentum < 0:
+    elif (
+        rsi <= 45
+        and price_momentum < 0
+    ):
         momentum = "BEARISH"
 
     else:
         momentum = "NEUTRAL"
 
-# --------------------------------------------------------
-# Momentum Strength - Step 3.5
-# --------------------------------------------------------
+    # --------------------------------------------------------
+    # Momentum Strength - Step 3.5
+    # --------------------------------------------------------
 
-if pd.isna(price_momentum):
-    momentum_strength = "UNKNOWN"
+    if pd.isna(price_momentum):
 
-elif abs(price_momentum) >= 0.15:
-    momentum_strength = "STRONG"
+        momentum_strength = "UNKNOWN"
 
-elif abs(price_momentum) >= 0.05:
-    momentum_strength = "MODERATE"
+    elif abs(price_momentum) >= 0.15:
 
-else:
-    momentum_strength = "WEAK"
-    
+        momentum_strength = "STRONG"
+
+    elif abs(price_momentum) >= 0.05:
+
+        momentum_strength = "MODERATE"
+
+    else:
+
+        momentum_strength = "WEAK"
+
     # --------------------------------------------------------
     # Base Score
     # --------------------------------------------------------
@@ -729,10 +780,16 @@ else:
     elif trend == "BEARISH":
         score -= 40
 
-    if structure in ["BREAKOUT_UP", "HIGHER_HIGH"]:
+    if structure in [
+        "BREAKOUT_UP",
+        "HIGHER_HIGH"
+    ]:
         score += 30
 
-    elif structure in ["BREAKOUT_DOWN", "LOWER_LOW"]:
+    elif structure in [
+        "BREAKOUT_DOWN",
+        "LOWER_LOW"
+    ]:
         score -= 30
 
     # --------------------------------------------------------
@@ -762,25 +819,37 @@ else:
     )
 
     if bullish_confirmation:
+
         confirmation = "CONFIRMED LONG"
 
     elif bearish_confirmation:
+
         confirmation = "CONFIRMED SHORT"
 
     else:
+
         confirmation = "NOT CONFIRMED"
 
     # --------------------------------------------------------
     # Final Signal
     # --------------------------------------------------------
 
-    if bullish_confirmation and score >= 50:
+    if (
+        bullish_confirmation
+        and score >= 50
+    ):
+
         signal = "LONG"
 
-    elif bearish_confirmation and score <= -50:
+    elif (
+        bearish_confirmation
+        and score <= -50
+    ):
+
         signal = "SHORT"
 
     else:
+
         signal = "WAIT"
 
     # --------------------------------------------------------
@@ -805,7 +874,8 @@ else:
             if pd.notna(price_momentum)
             else 0.0
         )
-    }
+    } 
+    
         
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
 
