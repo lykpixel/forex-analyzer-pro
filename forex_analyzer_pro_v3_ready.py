@@ -938,10 +938,11 @@ if interval == "30m":
     with col8:
         st.metric(
             "Price Momentum",
-            f"{m30_result['price_momentum']:+.5f}%"
-        )
-    st.metric(
-    "Momentum Strength",m30_result["momentum_strength"])
+            f"{m30_result['price_momentum']:+.5f}%")
+    col9 = st.columns(1)
+
+    with col9:   
+        st.metric("Momentum Strength",m30_result["momentum_strength"])
     
 st.success(f"✅ Data integrity OK • {status_text}")
 
