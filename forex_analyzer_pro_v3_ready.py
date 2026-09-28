@@ -768,13 +768,15 @@ def calculate_m30_signal(df):
         signal = "WAIT"
 
     return {
-        "signal": signal,
-        "trend": trend,
-        "structure": structure,
-        "momentum": momentum,
-        "confirmation": confirmation,
-        "score": score
-    }
+    "signal": signal,
+    "trend": trend,
+    "structure": structure,
+    "momentum": momentum,
+    "confirmation": confirmation,
+    "score": score,
+    "rsi": float(rsi) if pd.notna(rsi) else 0.0,
+    "price_momentum": float(price_momentum) if pd.notna(price_momentum) else 0.0
+}
         
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
 
@@ -828,6 +830,17 @@ if interval == "30m":
 
     with col6:
         st.metric("Score", m30_result["score"])
+
+    col7, col8 = st.columns(2)
+
+    with col7:
+        st.metric("RSI", f"{m30_result['rsi']:.1f}")
+
+    with col8:
+        st.metric(
+            "Price Momentum",
+            f"{m30_result['price_momentum']:+.3f}%"
+        )
         
 st.success(f"✅ Data integrity OK • {status_text}")
 
