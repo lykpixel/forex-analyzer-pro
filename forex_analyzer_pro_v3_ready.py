@@ -701,6 +701,22 @@ def calculate_m30_signal(df):
     else:
         momentum = "NEUTRAL"
 
+# --------------------------------------------------------
+# Momentum Strength - Step 3.5
+# --------------------------------------------------------
+
+if pd.isna(price_momentum):
+    momentum_strength = "UNKNOWN"
+
+elif abs(price_momentum) >= 0.15:
+    momentum_strength = "STRONG"
+
+elif abs(price_momentum) >= 0.05:
+    momentum_strength = "MODERATE"
+
+else:
+    momentum_strength = "WEAK"
+    
     # --------------------------------------------------------
     # Base Score
     # --------------------------------------------------------
@@ -772,6 +788,7 @@ def calculate_m30_signal(df):
     "trend": trend,
     "structure": structure,
     "momentum": momentum,
+    "momentum_strength": momentum_strength,
     "confirmation": confirmation,
     "score": score,
     "rsi": float(rsi) if pd.notna(rsi) else 0.0,
@@ -841,7 +858,26 @@ if interval == "30m":
             "Price Momentum",
             f"{m30_result['price_momentum']:+.3f}%"
         )
-        
+    col9, col10 = st.columns(2)
+
+with col9:
+    st.metric(
+        "Momentum Strength",
+        m30_result["momentum_strength"]
+    )
+
+with col10:
+    st.metric(
+        "RSI Zone",
+        (
+            "OVERSOLD"
+            if m30_result["rsi"] <= 30
+            else "OVERBOUGHT"
+            if m30_result["rsi"] >= 70
+            else "NORMAL"
+        )
+    )  
+    
 st.success(f"✅ Data integrity OK • {status_text}")
 
 data = add_indicators(raw, ema_fast, ema_slow, ema_trend, rsi_period, atr_period)
