@@ -941,19 +941,8 @@ if interval == "30m":
             f"{m30_result['price_momentum']:+.5f}%"
         )
     st.metric(
-    "Momentum Strength",
-    m30_result["momentum_strength"])
-    st.metric(
-        "RSI Zone",
-        (
-            "OVERSOLD"
-            if m30_result["rsi"] <= 30
-            else "OVERBOUGHT"
-            if m30_result["rsi"] >= 70
-            else "NORMAL"
-        )
-
-
+    "Momentum Strength",m30_result["momentum_strength"])
+    
 st.success(f"✅ Data integrity OK • {status_text}")
 
 data = add_indicators(raw, ema_fast, ema_slow, ema_trend, rsi_period, atr_period)
