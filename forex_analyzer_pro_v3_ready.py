@@ -940,13 +940,8 @@ if interval == "30m":
             "Price Momentum",
             f"{m30_result['price_momentum']:+.3f}%"
         )
-    col9, col10 = st.columns(2)
 
-    with col9:
-    st.metric(
-        "Momentum Strength",
-        m30_result["momentum_strength"]
-    )
+
 st.success(f"✅ Data integrity OK • {status_text}")
 
 data = add_indicators(raw, ema_fast, ema_slow, ema_trend, rsi_period, atr_period)
