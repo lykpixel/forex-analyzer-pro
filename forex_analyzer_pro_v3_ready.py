@@ -783,17 +783,29 @@ else:
     else:
         signal = "WAIT"
 
+    # --------------------------------------------------------
+    # Return
+    # --------------------------------------------------------
+
     return {
-    "signal": signal,
-    "trend": trend,
-    "structure": structure,
-    "momentum": momentum,
-    "momentum_strength": momentum_strength,
-    "confirmation": confirmation,
-    "score": score,
-    "rsi": float(rsi) if pd.notna(rsi) else 0.0,
-    "price_momentum": float(price_momentum) if pd.notna(price_momentum) else 0.0
-}
+        "signal": signal,
+        "trend": trend,
+        "structure": structure,
+        "momentum": momentum,
+        "momentum_strength": momentum_strength,
+        "confirmation": confirmation,
+        "score": score,
+        "rsi": (
+            float(rsi)
+            if pd.notna(rsi)
+            else 0.0
+        ),
+        "price_momentum": (
+            float(price_momentum)
+            if pd.notna(price_momentum)
+            else 0.0
+        )
+    }
         
 with st.spinner("กำลังโหลดและตรวจสอบข้อมูล..."):
 
