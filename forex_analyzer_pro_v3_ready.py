@@ -938,7 +938,7 @@ if interval == "30m":
     with col8:
         st.metric(
             "Price Momentum",
-            f"{m30_result['price_momentum']:+.3f}%"
+            f"{m30_result['price_momentum']:+.5f}%"
         )
 
 
