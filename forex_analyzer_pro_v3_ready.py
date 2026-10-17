@@ -27,6 +27,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from datetime import datetime, timezone
+from strategies.m30_v3 import calculate_m30_signal
 
 import numpy as np
 import pandas as pd
