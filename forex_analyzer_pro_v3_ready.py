@@ -905,6 +905,9 @@ if not ok:
 if interval == "30m":
     m30_result = calculate_m30_signal(raw)
 
+    legacy_result = calculate_m30_signal_legacy(raw)
+    st.write("M30 module matches legacy:", m30_result == legacy_result)
+
     st.subheader("📊 M30 V3 Signal")
 
     col1, col2 = st.columns(2)
