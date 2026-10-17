@@ -589,7 +589,7 @@ st.caption(
 import pandas as pd
 import numpy as np
 
-def calculate_m30_signal(df):
+def calculate_m30_signal_legacy(df):
     """
     M30 V3 Signal Engine
     Trend + Market Structure + Momentum + Signal Confirmation
